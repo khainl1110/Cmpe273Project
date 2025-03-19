@@ -23,16 +23,47 @@ const io = socketIo(server, {
   }
 });
 
+step = 0;
+chatMsg = "";
+
+// Game state and questions
+const questions = [
+  {
+    id: 1,
+    text: "What is the capital of France?",
+    answers: ["London", "Paris", "Berlin", "Madrid"],
+    correct: 1
+  },
+  {
+    id: 2,
+    text: "Which planet is known as the Red Planet?",
+    answers: ["Venus", "Mars", "Jupiter", "Saturn"],
+    correct: 2
+  }
+];
+
+
+
 io.on('connection', (socket) => {
   console.log('New client connected');
   
   socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+    console.log(questions[step].correct + " " + msg)
+    if(questions[step].correct == (msg-1)) {
+      chatMsg = 'Correct message';
+    } else chatMsg = 'Uncorrect message';
+    
+
+   
+    step += 1;
+    if(step == 2)
+      step = 0;
+    io.emit('chat message', chatMsg);
   });
 
-  socket.on('chat message1', (msg) => {
-    io.emit('chat message1', msg);
-  });
+  // socket.on('chat message1', (msg) => {
+  //   io.emit('chat message1', msg);
+  // });
 
   socket.on('disconnect', () => {
     console.log('Client disconnected');
