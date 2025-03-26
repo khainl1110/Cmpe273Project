@@ -24,6 +24,7 @@ const io = socketIo(server, {
 });
 
 step = 0;
+userName = '';
 chatMsg = "";
 
 // Game state and questions
@@ -48,24 +49,34 @@ io.on('connection', (socket) => {
   console.log('New client connected');
   
   socket.on('chat message', (msg) => {
-    console.log(questions[step].correct + " " + msg)
-    if(questions[step].correct == (msg-1)) {
-      chatMsg = 'Correct message';
-    } else chatMsg = 'Uncorrect message';
-    
+    if (step == 0) {
+      userName = msg;
+      chatMsg = questions[step].text;
+      step +=1;
+      console.log("Current step 0")
+    } else if (step == 1) {
+      if(questions[step-1].correct == (msg-1)) {
+        chatMsg = 'Correct message';
+      } else chatMsg = 'Uncorrect message';
+     
+      chatMsg += ' ' + questions[step].text;
+      step +=1;
+      console.log("Current step 1");
+    } else {
+      if(questions[step-1].correct == (msg-1)) {
+        chatMsg = 'Correct message';
+      } else chatMsg = 'Uncorrect message';
 
-   
-    step += 1;
-    if(step == 2)
-      step = 0;
+      chatMsg += ' ' + " game over!";
+      step =0;
+      console.log("Current step 2");
+    }
+    
     io.emit('chat message', chatMsg);
   });
 
-  // socket.on('chat message1', (msg) => {
-  //   io.emit('chat message1', msg);
-  // });
-
   socket.on('disconnect', () => {
+    step = 0;
     console.log('Client disconnected');
   });
 });
