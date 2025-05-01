@@ -11,3 +11,18 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.blinking-cursor::after {
+  content: var(--cursor-char, '|');
+  animation: blink 1.1s steps(2, start) infinite;
+  font-weight: bold;
+  margin-left: 4px;
+  color: var(--cursor-color, #000);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+

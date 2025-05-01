@@ -2,9 +2,10 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const axios = require('axios')
+const axios = require('axios');
 require('dotenv').config();
 
+let lastQuestionIndex = -1;
 
 const app = express();
 
@@ -27,7 +28,7 @@ const io = socketIo(server, {
 });
 
 // the secret got remove
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 step = 0;
@@ -51,8 +52,45 @@ const questions = [
     options: ["Venus", "Mars", "Jupiter", "Saturn"],
     end: false,
     correctIndex: 1
+  },
+  {
+    id: 3,
+    question: "What is the largest ocean on Earth?",
+    options: ["Atlantic", "Indian", "Pacific", "Arctic"],
+    end: false,
+    correctIndex: 2
+  },
+  {
+    id: 4,
+    question: "Who wrote the play 'Romeo and Juliet'?",
+    options: ["William Shakespeare", "Jane Austen", "Mark Twain", "Charles Dickens"],
+    end: false,
+    correctIndex: 0
+  },
+  {
+    id: 5,
+    question: "Which element has the chemical symbol 'O'?",
+    options: ["Osmium", "Oxygen", "Gold", "Zinc"],
+    end: false,
+    correctIndex: 1
+  },
+  {
+    id: 6,
+    question: "Which country is home to the kangaroo?",
+    options: ["New Zealand", "India", "Australia", "South Africa"],
+    end: false,
+    correctIndex: 2
+  },
+  {
+    id: 7,
+    question: "What is the name of the fairy in Peter Pan?",
+    options: ["Silvermist", "Tinker Bell", "Rosetta", "Fawn"],
+    end: false,
+    correctIndex: 1
   }
 ];
+
+console.log("Your API key:", OPENAI_API_KEY);
 
 // GPT Question Generator
 async function generateQuestion(topic) {
@@ -101,29 +139,29 @@ app.get('/api/generate', async (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('New client connected');
-  
-  socket.on('chat message', (msg) => {
-    if (step == 0) {
-      userName = msg;
-      chatMsg = questions[step];
-      console.log(chatMsg)
-      step +=1;
-      console.log("Current step 0")
-    }
-    else if (step == 1) {
-      score += parseInt(msg, 10)
-      chatMsg = questions[step];
-      console.log(chatMsg)
-      console.log("Current step 0")
-      step +=1;
-    } else {
-      score += parseInt(msg, 10)
-      step +=1;
-      chatMsg = {end: true, score: score, name: userName}
-      console.log(chatMsg)
-    }
-    
-    io.emit('chat message', chatMsg);
+
+socket.on('chat message', (msg) => {
+  let newIndex;
+  do {
+    newIndex = Math.floor(Math.random() * questions.length);
+  } while (newIndex === lastQuestionIndex && questions.length > 1);
+  lastQuestionIndex = newIndex;
+
+  if (typeof msg === 'string') {
+    userName = msg;
+  } else {
+    score += parseInt(msg, 10);
+  }
+
+  chatMsg = questions[newIndex];
+  io.emit('chat message', chatMsg);
+});
+
+
+  socket.on('reset', () => {
+    step = 0;
+    score = 0;
+    console.log('Game state reset');
   });
 
   socket.on('disconnect', () => {

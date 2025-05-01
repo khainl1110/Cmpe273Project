@@ -36,3 +36,14 @@
     transform: rotate(360deg);
   }
 }
+
+.blinking-cursor::after {
+  content: var(--cursor-char, "|");
+  color: var(--cursor-color, currentColor);
+  animation: blink 1s step-start infinite;
+  margin-left: 4px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
