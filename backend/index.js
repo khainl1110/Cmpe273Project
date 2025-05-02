@@ -27,17 +27,20 @@ const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 let score = 0;
 let username = '';
 let currentTopic = null;
+
 let lastTenAnswers = [];
+let lastTenQuestions = [];
 
 const sampleQuestions = require('./sampleQuestions.json'); // assume you have this file
 
 // GPT QUESTION GENERATOR
-async function generateAIQuestion(topic) {
+async function generateAIQuestion(topic, avoidList = []) {
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${OPENAI_API_KEY}`,
   };
 
+  const blockedWords = avoidList.join(', ') || 'none';
   const body = {
     model: "gpt-4o-mini",
     messages: [
@@ -47,7 +50,7 @@ async function generateAIQuestion(topic) {
       },
       {
         role: "user",
-        content: `Create a unique question about the topic: ${topic}`,
+        content: `1. Create a trivia question specifically about: "${topic}" 2. The questions CANNOT be about these topics: "${blockedWords}"`,
       }
     ],
     response_format: { type: "json_object" },
@@ -60,10 +63,10 @@ async function generateAIQuestion(topic) {
 // API testing route (optional)
 app.get('/api/generate', async (req, res) => {
   let topic = req.query.topic?.trim();
-  if (!topic || topic.length < 3) topic = 'general';
+  if (!topic || topic.length < 3) topic = 'general knowledge';
 
   try {
-    const question = await generateAIQuestion(topic);
+    const question = await generateAIQuestion(topic, lastTenAnswers);
     res.json(question);
   } catch (err) {
     console.error('API error:', err.response?.data || err.message);
@@ -71,52 +74,76 @@ app.get('/api/generate', async (req, res) => {
   }
 });
 
+const path = require('path');
+const fs = require('fs');
+app.use('/music', express.static(path.join(__dirname, '..', 'chat-app', 'public', 'music')));
+app.get('/api/music-list', (req, res) => {
+  const musicDir = path.join(__dirname, '..', 'chat-app', 'public', 'music');
+  fs.readdir(musicDir, (err, files) => {
+    if (err) {
+      console.error('Failed to read music directory:', err);
+      return res.status(500).json([]);
+    }
+    const mp3s = files.filter(f => f.endsWith('.mp3')).map(f => `/music/${f}`);
+    res.json(mp3s);
+  });
+});
+
 // SOCKET.IO
+
 io.on('connection', (socket) => {
   console.log('🟢 New client connected');
 
   socket.on('chat message', async (msg) => {
-    let topic = currentTopic || 'general';
+    let topic = currentTopic || 'general knowledge';
 
     if (typeof msg === 'object') {
-      userName = msg.name || '';
+      username = msg.name || '';
       if (typeof msg.topic === 'string' && msg.topic.trim().length >= 3) {
         topic = msg.topic.trim();
-        currentTopic = topic; // 🔒 persist once selected
+        currentTopic = topic;
       }
-    } else if (typeof msg === 'string') {
-      userName = msg;
-    } else if (typeof msg === 'number') {
-      score += msg;
     } else if (typeof msg === 'string') {
       username = msg;
     } else if (typeof msg === 'number') {
       score += msg;
     }
 
-    const apiUrl = `http://localhost:3001/api/generate?topic=${encodeURIComponent(topic)}`;
     let attempt = 0;
     let chatMsg;
     let answerText;
 
-    while (attempt < 2) {
+    while (attempt < 4) {
       try {
-        const res = await axios.get(apiUrl);
-        chatMsg = res.data;
+        chatMsg = await generateAIQuestion(topic, lastTenAnswers);
         answerText = chatMsg.options?.[chatMsg.correctIndex];
 
-        const normalized = answerText?.toLowerCase().replace(/[^\w\s]/g, '').trim();
+        const normalizedAnswer = answerText  
+          ?.toLowerCase()
+          .replace(/[^a-z0-9]/g, '') // remove everything except letters + numbers
+          .trim();
 
-        if (!normalized || lastTenAnswers.includes(normalized)) {
-          console.log(`⛔ Skipping duplicate or bad question: ${answerText}`);
+        const normalizedQuestion = chatMsg.question?.toLowerCase().replace(/[^\w\s]/g, '').trim();
+
+        const isAnswerRepeat = !normalizedAnswer || lastTenAnswers.includes(normalizedAnswer);
+        const isQuestionRepeat = !normalizedQuestion || lastTenQuestions.includes(normalizedQuestion);
+
+        if (isAnswerRepeat || isQuestionRepeat) {
+          console.log(`❌ Skipping repeated content`);
+          console.log(`🔁 Answer: "${normalizedAnswer}"`);
+          console.log(`🔁 Question: "${normalizedQuestion}"`);
+          console.log(`🧠 Blocked Answers: [${lastTenAnswers.join(', ')}]`);
+          console.log(`🧠 Blocked Questions: [${lastTenQuestions.join(', ')}]`);
           attempt++;
           continue;
         }
 
-        lastTenAnswers.push(normalized);
-        if (lastTenAnswers.length > 10) lastTenAnswers.shift();
+        lastTenAnswers.push(normalizedAnswer);
+        lastTenQuestions.push(normalizedQuestion);
+        if (lastTenAnswers.length > 15) lastTenAnswers.shift(); // saving 15 answers for now, not 10
+        if (lastTenQuestions.length > 15) lastTenQuestions.shift();
 
-        break; // exit loop on success
+        break;
       } catch (err) {
         console.warn('⚠️ GPT error, falling back...', err.message);
         attempt++;
@@ -124,6 +151,7 @@ io.on('connection', (socket) => {
     }
 
     if (!chatMsg) {
+      console.warn('🚨 All GPT attempts failed or repeated. Using fallback.');
       const fallback = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
       chatMsg = fallback;
     }
@@ -136,6 +164,7 @@ io.on('connection', (socket) => {
     score = 0;
     username = '';
     lastTenAnswers = [];
+    lastTenQuestions = [];
     console.log('🔁 Game reset');
   });
 
@@ -145,6 +174,7 @@ io.on('connection', (socket) => {
     console.log('🔌 Client disconnected');
   });
 });
+
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

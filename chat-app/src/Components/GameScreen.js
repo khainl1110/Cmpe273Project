@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Stack } from '@mui/material';
 import { ThemeContext } from './ThemeContext';
+import MusicPlayer from './MusicPlayer';
 import { themes } from '../themes';
 import io from 'socket.io-client';
 
@@ -11,9 +12,10 @@ const socket = io('http://localhost:3001', {
   extraHeaders: { 'Access-Control-Allow-Origin': '*' }
 });
 
-function GameScreen({name, topic, selectedEmoji, resetToStart}) {
-  const navigate = useNavigate();
+
+function GameScreen({ name, topic, selectedEmoji, resetToStart, restartGame }) {
   const { theme } = useContext(ThemeContext);
+  const navigate = useNavigate();
 
   const [questionPool, setQuestionPool] = useState([]);
   const [usedIndices, setUsedIndices] = useState([]);
@@ -24,6 +26,8 @@ function GameScreen({name, topic, selectedEmoji, resetToStart}) {
   const [skips, setSkips] = useState(3);
   const [timeUp, setTimeUp] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
     const handle = (msg) => {
@@ -35,13 +39,11 @@ function GameScreen({name, topic, selectedEmoji, resetToStart}) {
 
     if (!hasFetched) {
       socket.emit('chat message', { name, topic });
-      [0, 100, 200].forEach(d => setTimeout(() => socket.emit('chat message', { topic, score }), d));
       setHasFetched(true);
     }
 
     return () => socket.off('chat message', handle);
   }, [name, topic, hasFetched, questionPool, score]);
-
 
   useEffect(() => {
     if (!question && questionPool.length >= 1) nextQuestion();
@@ -49,18 +51,33 @@ function GameScreen({name, topic, selectedEmoji, resetToStart}) {
 
   useEffect(() => {
     if (!question) return;
+    let timerCleared = false;
+    let handled = false;
+
     setTimer(10);
+
     const countdown = setInterval(() => {
       setTimer(t => {
         if (t <= 1) {
-          clearInterval(countdown);
-          handleMissed();
+          if (!handled) {
+            handled = true;
+            clearInterval(countdown);
+            setTimeout(() => {
+              if (!timerCleared) {
+                handleMissed();
+              }
+            }, 50);
+          }
           return 0;
         }
         return t - 1;
       });
     }, 1000);
-    return () => clearInterval(countdown);
+
+    return () => {
+      clearInterval(countdown);
+      timerCleared = true;
+    };
   }, [question]);
 
   const nextQuestion = () => {
@@ -85,13 +102,20 @@ function GameScreen({name, topic, selectedEmoji, resetToStart}) {
   const handleAnswer = (idx) => {
     if (timeUp || !question) return;
     const correct = idx === question.correctIndex;
-    setScore(s => correct ? s + 1 : s);
-    if (!correct) setLives(l => (l <= 1 ? endGame() : l - 1));
-    nextQuestion();
+    setSelectedIndex(idx);
+    setShowResult(true);
+
+    setTimeout(() => {
+      setScore(s => correct ? s + 1 : s);
+      if (!correct) setLives(l => (l <= 1 ? endGame() : l - 1));
+      setSelectedIndex(null);
+      setShowResult(false);
+      nextQuestion();
+    }, 1000);
   };
 
   const handleMissed = () => {
-    setLives(l => (l <= 1 ? endGame() : l - 1));
+    setLives(l => l <= 1 ? endGame() : l - 1);
     setTimeUp(true);
     nextQuestion();
   };
@@ -104,68 +128,30 @@ function GameScreen({name, topic, selectedEmoji, resetToStart}) {
 
   const endGame = () => navigate('/score', { state: { name, score } });
 
-  const restartGame = () => {
-    navigate('/');
-    socket.emit('reset');
-    setQuestion(null);
-    setQuestionPool([]);
-    setUsedIndices([]);
-    setScore(0);
-    setLives(3);
-    setSkips(3);
-    setTimer(10);
-    setTimeUp(false);
-    setHasFetched(false);
-
-    socket.disconnect();
-    setTimeout(() => {
-      socket.connect();
-    }, 200);
-  };
-
   return (
-    <Box
-      sx={{
-        p: 4,
-        textAlign: 'center',
-        fontFamily: themes[theme].font,
-        backgroundColor: themes[theme].background,
-        color: themes[theme].text,
-        fontSize: '1.1rem',
-        minHeight: '100vh',
-        transition: 'background-color 0.4s ease'
-      }}
-    >
-
-    <Box sx={{ position: 'absolute', top: 10, left: 10, fontSize: '1.5rem' }}>
-      {selectedEmoji}
-    </Box>
+    <Box sx={{ p: 4, textAlign: 'center', fontFamily: themes[theme].font, backgroundColor: themes[theme].background, color: themes[theme].text, fontSize: '1.1rem', minHeight: '100vh', transition: 'background-color 0.4s ease' }}>
+      <Box sx={{ position: 'absolute', top: 10, left: 10, fontSize: '1.5rem' }}>{selectedEmoji}</Box>
 
       <h2>Hey {name || 'Player'} 👋</h2>
       <p>❤️ Lives: {lives} | ⭐ Score: {score} | ⏱️ Time: {timer}s | ⏩ Skips: {skips}</p>
 
       {question && (
-        <Box
-          sx={{
-            mt: 4,
-            p: 3,
-            backgroundColor: (theme === 'cute' || theme === 'clean') ? '#fff' : '#2c2c2c',
-            color: (theme === 'cute' || theme === 'clean') ? '#000' : themes[theme].text,
-            borderRadius: '16px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            maxWidth: 600,
-            mx: 'auto'
-          }}
-        >
+        <Box sx={{ mt: 4, p: 3, backgroundColor: (theme === 'cute' || theme === 'clean') ? '#fff' : '#2c2c2c', color: (theme === 'cute' || theme === 'clean') ? '#000' : themes[theme].text, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxWidth: 600, mx: 'auto' }}>
           <h3>{question.question}</h3>
           <Stack direction="column" spacing={2} mt={3}>
             {question.options.map((opt, i) => (
               <Button
                 key={i}
                 onClick={() => handleAnswer(i)}
-                disabled={timeUp}
+                disabled={timeUp || showResult}
                 sx={{
-                  backgroundColor: themes[theme].button,
+                  backgroundColor: showResult
+                    ? i === question.correctIndex
+                      ? '#66bb6a'
+                      : i === selectedIndex
+                      ? '#ef5350'
+                      : themes[theme].button
+                    : themes[theme].button,
                   color: themes[theme].text,
                   fontWeight: 600,
                   borderRadius: '10px',
@@ -173,7 +159,9 @@ function GameScreen({name, topic, selectedEmoji, resetToStart}) {
                   py: 1.5,
                   fontSize: '1rem',
                   fontFamily: themes[theme].font,
-                  '&:hover': { backgroundColor: themes[theme].buttonHover }
+                  '&:hover': {
+                    backgroundColor: showResult ? undefined : themes[theme].buttonHover,
+                  }
                 }}
               >
                 {opt}
@@ -203,4 +191,3 @@ function GameScreen({name, topic, selectedEmoji, resetToStart}) {
 }
 
 export default GameScreen;
-

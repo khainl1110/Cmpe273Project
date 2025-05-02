@@ -4,27 +4,25 @@ import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from './ThemeContext';
 import { themes } from '../themes';
 import GameScreen from './GameScreen';
+import MusicPlayer from './MusicPlayer';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:3001', {
   transports: ['websocket'],
   withCredentials: true,
-  extraHeaders: {
-    'Access-Control-Allow-Origin': '*'
-  }
+  extraHeaders: { 'Access-Control-Allow-Origin': '*' }
 });
 
-function TriviaGame() {
+function TriviaGame({ hasStarted, setHasStarted, name, setName, restartGame, socket }) {
   const navigate = useNavigate();
   const { theme, setTheme } = useContext(ThemeContext);
-  const [name, setName] = useState('');
+  //const [name, setName] = useState('');
   const [customInput, setCustomInput] = useState('');
-
-  const [hasStarted, setHasStarted] = useState(false);
+  //const [hasStarted, setHasStarted] = useState(false);
   const [showThemes, setShowThemes] = useState(false);
   const [showTopics, setShowTopics] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState('❓');
-  const [selectedTopic, setSelectedTopic] = useState('generic');
+  const [selectedTopic, setSelectedTopic] = useState('general knowledge');
 
   useEffect(() => {
     const root = document.documentElement;
@@ -50,6 +48,7 @@ function TriviaGame() {
     setName('');
     setHasStarted(false);
   };
+
 
   return (
     <Box
@@ -123,7 +122,7 @@ function TriviaGame() {
                   { emoji: '🎸', topic: 'music' },
                   { emoji: '🪐', topic: 'space' },
                   { emoji: '🏛', topic: 'history' },
-                  { emoji: '🎨', topic: 'art' },
+                  { emoji: '🎨', topic: 'art & art history' },
                   { emoji: '🧪', topic: 'science' },
                   { emoji: '🎬', topic: 'film/tv' },
                   { emoji: '⚽', topic: 'sports' },
@@ -155,14 +154,14 @@ function TriviaGame() {
 
             {selectedTopic === 'custom' && (
               <TextField
-                placeholder="Type a topic (max 15 chars)"
+                placeholder="Type a topic (25 chars)"
                 variant="standard"
                 value={customInput}
-                inputProps={{ maxLength: 15 }}
-                onChange={(e) => setCustomInput(e.target.value.trim())}
+                inputProps={{ maxLength: 25 }}
+                onChange={(e) => setCustomInput(e.target.value)}
                 sx={{
                   mt: 1,
-                  width: '150px',
+                  width: '160px',
                   backgroundColor: '#fff',
                   borderRadius: '6px',
                   px: 1,
@@ -213,8 +212,10 @@ function TriviaGame() {
           topic={selectedTopic === 'custom' ? customInput : selectedTopic}
           selectedEmoji={selectedEmoji}
           resetToStart={resetToStart}
+          restartGame={restartGame}
         />
       )}
+      <MusicPlayer />
     </Box>
   );
 }

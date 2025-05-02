@@ -3,8 +3,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ThemeContext } from './ThemeContext';
 import { themes } from '../themes';
 import { Box, Button, Typography, Stack, IconButton } from '@mui/material';
+import io from 'socket.io-client';
 
-function ScorePage() {
+const socket = io('http://localhost:3001', {
+  transports: ['websocket'],
+  withCredentials: true,
+  extraHeaders: { 'Access-Control-Allow-Origin': '*' }
+});
+
+
+function ScorePage({ restartGame }) {
   const { theme, setTheme } = useContext(ThemeContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,7 +36,14 @@ function ScorePage() {
   ];
 
   const handlePlayAgain = () => {
-    navigate('/'); // Reset to name screen
+    restartGame();
+    navigate('/');
+    socket.emit('reset');
+
+    socket.disconnect();
+    setTimeout(() => {
+      socket.connect();
+    }, 200);
   };
 
   return (
