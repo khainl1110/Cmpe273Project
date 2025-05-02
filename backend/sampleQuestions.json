@@ -1,0 +1,261 @@
+[
+  {
+    "id": 1,
+    "question": "What is the capital of France?",
+    "options": ["London", "Paris", "Berlin", "Madrid"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 2,
+    "question": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 3,
+    "question": "What is the largest ocean on Earth?",
+    "options": ["Atlantic", "Indian", "Pacific", "Arctic"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 4,
+    "question": "Who wrote the play 'Romeo and Juliet'?",
+    "options": ["William Shakespeare", "Jane Austen", "Mark Twain", "Charles Dickens"],
+    "end": false,
+    "correctIndex": 0
+  },
+  {
+    "id": 5,
+    "question": "Which element has the chemical symbol 'O'?",
+    "options": ["Osmium", "Oxygen", "Gold", "Zinc"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 6,
+    "question": "Which country is home to the kangaroo?",
+    "options": ["New Zealand", "India", "Australia", "South Africa"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 7,
+    "question": "What is the name of the fairy in Peter Pan?",
+    "options": ["Silvermist", "Tinker Bell", "Rosetta", "Fawn"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+  "id": 8,
+  "question": "Which gas do plants absorb from the atmosphere?",
+  "options": ["Oxygen", "Carbon Dioxide", "Hydrogen", "Nitrogen"],
+  "end": false,
+  "correctIndex": 1
+  },
+  {
+    "id": 9,
+    "question": "In what year did the Titanic sink?",
+    "options": ["1912", "1905", "1920", "1898"],
+    "end": false,
+    "correctIndex": 0
+  },
+  {
+    "id": 10,
+    "question": "What is the hardest natural substance on Earth?",
+    "options": ["Gold", "Iron", "Diamond", "Quartz"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 11,
+    "question": "How many continents are there on Earth?",
+    "options": ["5", "6", "7", "8"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 12,
+    "question": "Which famous scientist developed the theory of general relativity?",
+    "options": ["Isaac Newton", "Albert Einstein", "Nikola Tesla", "Marie Curie"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 13,
+    "question": "Which language has the most native speakers worldwide?",
+    "options": ["English", "Spanish", "Hindi", "Mandarin Chinese"],
+    "end": false,
+    "correctIndex": 3
+  },
+  {
+    "id": 14,
+    "question": "Which animal is known as the 'Ship of the Desert'?",
+    "options": ["Elephant", "Camel", "Horse", "Llama"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 15,
+    "question": "What is the square root of 144?",
+    "options": ["10", "11", "12", "13"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 16,
+    "question": "Which Disney movie features a talking snowman named Olaf?",
+    "options": ["Frozen", "Moana", "Tangled", "Brave"],
+    "end": false,
+    "correctIndex": 0
+  },
+  {
+    "id": 17,
+    "question": "Which U.S. president issued the Emancipation Proclamation?",
+    "options": ["George Washington", "Thomas Jefferson", "Abraham Lincoln", "Theodore Roosevelt"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 18,
+    "question": "What is the main ingredient in guacamole?",
+    "options": ["Tomato", "Avocado", "Cucumber", "Pepper"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 19,
+    "question": "Which instrument has keys, pedals, and strings?",
+    "options": ["Violin", "Drum", "Flute", "Piano"],
+    "end": false,
+    "correctIndex": 3
+  },
+  {
+    "id": 20,
+    "question": "Who painted the ceiling of the Sistine Chapel?",
+    "options": ["Michelangelo", "Leonardo da Vinci", "Raphael", "Donatello"],
+    "end": false,
+    "correctIndex": 0
+  },
+  {
+    "id": 21,
+    "question": "What is the chemical symbol for gold?",
+    "options": ["Ag", "Au", "Gd", "Go"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 22,
+    "question": "Which planet has the most moons?",
+    "options": ["Jupiter", "Saturn", "Neptune", "Mars"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 23,
+    "question": "What is the largest land animal?",
+    "options": ["White Rhinoceros", "Giraffe", "African Elephant", "Hippopotamus"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 24,
+    "question": "Which country invented paper?",
+    "options": ["India", "Greece", "China", "Egypt"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 25,
+    "question": "How many legs does a spider have?",
+    "options": ["6", "8", "10", "12"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 26,
+    "question": "What is H2O more commonly known as?",
+    "options": ["Salt", "Water", "Hydrogen", "Oxygen"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 27,
+    "question": "Which video game franchise features characters named Link and Zelda?",
+    "options": ["Final Fantasy", "The Legend of Zelda", "God of War", "Elden Ring"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+  "id": 28,
+  "question": "Which organ in the human body is responsible for pumping blood?",
+  "options": ["Lungs", "Brain", "Liver", "Heart"],
+  "end": false,
+  "correctIndex": 3
+  },
+  {
+    "id": 29,
+    "question": "What is the name of the longest river in the world?",
+    "options": ["Amazon", "Yangtze", "Mississippi", "Nile"],
+    "end": false,
+    "correctIndex": 3
+  },
+  {
+    "id": 30,
+    "question": "Which continent is the Sahara Desert located on?",
+    "options": ["Asia", "Africa", "Australia", "South America"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 31,
+    "question": "What is the main language spoken in Brazil?",
+    "options": ["Portuguese", "Spanish", "French", "English"],
+    "end": false,
+    "correctIndex": 0
+  },
+  {
+    "id": 32,
+    "question": "What is the freezing point of water in Celsius?",
+    "options": ["0", "32", "100", "-10"],
+    "end": false,
+    "correctIndex": 0
+  },
+  {
+    "id": 33,
+    "question": "Which popular video game features blocks and mining?",
+    "options": ["Roblox", "Minecraft", "Fortnite", "Terraria"],
+    "end": false,
+    "correctIndex": 1
+  },
+  {
+    "id": 34,
+    "question": "Which bird is known for mimicking sounds, including human speech?",
+    "options": ["Sparrow", "Crow", "Parrot", "Owl"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 35,
+    "question": "Who was the first person to walk on the Moon?",
+    "options": ["Buzz Aldrin", "Yuri Gagarin", "Neil Armstrong", "Alan Shepard"],
+    "end": false,
+    "correctIndex": 2
+  },
+  {
+    "id": 36,
+    "question": "What do you call a baby goat?",
+    "options": ["Calf", "Foal", "Cub", "Kid"],
+    "end": false,
+    "correctIndex": 3
+  },
+  {
+    "id": 37,
+    "question": "Which sport is known as 'the beautiful game'?",
+    "options": ["Basketball", "Tennis", "Soccer", "Baseball"],
+    "end": false,
+    "correctIndex": 2
+  }
+]

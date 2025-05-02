@@ -11,21 +11,20 @@ const socket = io('http://localhost:3001', {
   extraHeaders: { 'Access-Control-Allow-Origin': '*' }
 });
 
-function GameScreen({ name }) {
+function GameScreen({name, topic, selectedEmoji, resetToStart}) {
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext);
 
   const [questionPool, setQuestionPool] = useState([]);
   const [usedIndices, setUsedIndices] = useState([]);
   const [question, setQuestion] = useState(null);
-  const [score, setScore] = useState(0);
   const [timer, setTimer] = useState(10);
-  const [timeUp, setTimeUp] = useState(false);
+  const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [skips, setSkips] = useState(3);
+  const [timeUp, setTimeUp] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
 
-  // Fetch 3 questions spaced out slightly to prevent duplicates
   useEffect(() => {
     const handle = (msg) => {
       if (msg?.question && !questionPool.some(q => q.question === msg.question)) {
@@ -35,13 +34,14 @@ function GameScreen({ name }) {
     socket.on('chat message', handle);
 
     if (!hasFetched) {
-      socket.emit('chat message', name);
-      [0, 100, 200].forEach(d => setTimeout(() => socket.emit('chat message', score), d));
+      socket.emit('chat message', { name, topic });
+      [0, 100, 200].forEach(d => setTimeout(() => socket.emit('chat message', { topic, score }), d));
       setHasFetched(true);
     }
 
     return () => socket.off('chat message', handle);
-  }, [name, hasFetched, questionPool, score]);
+  }, [name, topic, hasFetched, questionPool, score]);
+
 
   useEffect(() => {
     if (!question && questionPool.length >= 1) nextQuestion();
@@ -65,16 +65,21 @@ function GameScreen({ name }) {
 
   const nextQuestion = () => {
     const available = questionPool.map((_, i) => i).filter(i => !usedIndices.includes(i));
+
     if (available.length === 0) {
       setUsedIndices([]);
-      socket.emit('chat message', score);
+      socket.emit('chat message', { topic, score });
       return;
     }
+
     const idx = available[Math.floor(Math.random() * available.length)];
     setUsedIndices(prev => [...prev, idx]);
     setQuestion(questionPool[idx]);
     setTimeUp(false);
-    if (available.length < 2) socket.emit('chat message', score);
+
+    if (available.length < 2) {
+      socket.emit('chat message', score);
+    }
   };
 
   const handleAnswer = (idx) => {
@@ -100,6 +105,7 @@ function GameScreen({ name }) {
   const endGame = () => navigate('/score', { state: { name, score } });
 
   const restartGame = () => {
+    navigate('/');
     socket.emit('reset');
     setQuestion(null);
     setQuestionPool([]);
@@ -110,10 +116,10 @@ function GameScreen({ name }) {
     setTimer(10);
     setTimeUp(false);
     setHasFetched(false);
+
     socket.disconnect();
     setTimeout(() => {
       socket.connect();
-      navigate('/');
     }, 200);
   };
 
@@ -130,6 +136,11 @@ function GameScreen({ name }) {
         transition: 'background-color 0.4s ease'
       }}
     >
+
+    <Box sx={{ position: 'absolute', top: 10, left: 10, fontSize: '1.5rem' }}>
+      {selectedEmoji}
+    </Box>
+
       <h2>Hey {name || 'Player'} 👋</h2>
       <p>❤️ Lives: {lives} | ⭐ Score: {score} | ⏱️ Time: {timer}s | ⏩ Skips: {skips}</p>
 
@@ -192,3 +203,4 @@ function GameScreen({ name }) {
 }
 
 export default GameScreen;
+
