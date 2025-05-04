@@ -42,7 +42,16 @@ function Chat() {
 
   function AnswerBox({options}) {
     let submitAnswer = (num) => {
-        num == fQuestion.correctIndex? setScore(score +1) : null
+        //num == fQuestion.correctIndex? setScore(score +1) : null
+        if (num === fQuestion.correctIndex) {
+          setScore(score + 1);
+          socket.emit('chat message', score + 1); // <-- send the updated score
+        } else {
+          socket.emit('chat message', score);     // <-- send current score if wrong
+        }
+        setInputValue('');
+
+
         socket.emit('chat message', score);
         setInputValue('');
     }

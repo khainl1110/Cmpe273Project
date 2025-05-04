@@ -1,0 +1,42 @@
+export const themes = {
+    night: {
+    icon: '🌙',
+    background: '#34373C',
+    text: '#e0e0e0',
+    font: `'Arial', system-ui, sans-serif`,
+    primary: '#444',
+    primaryHover: '#666',
+    button: '#2e2e2e',
+    buttonHover: '#3d3d3d',
+  },
+  clean: {
+    icon: '☀️',
+    background: '#FDF2E5',
+    text: '#4F3823',
+    font: `'Verdana', 'Tahoma', sans-serif`,
+    primary: '#5A9BD5',
+    primaryHover: '#3E8EDE',
+    button: '#ffffff',
+    buttonHover: '#eeeeee',
+  },
+  cute: {
+    icon: '🎀',
+    background: '#fff0f5',
+    text: '#802f5a',
+    font: `'Segoe UI', 'Arial Rounded MT Bold', cursive`,
+    primary: '#e69ecf',
+    primaryHover: '#d87abb',
+    button: '#f8cde6',
+    buttonHover: '#f3a2cd',
+  },
+  gamer: {
+    icon: '🎮',
+    background: '#121212',
+    text: '#3CB74E',       // bright neon green
+    font: `'Courier New', 'Lucida Console', monospace`,
+    primary: '#7CFC00',
+    primaryHover: '#5fe600',
+    button: '#1b1b1b',
+    buttonHover: '#292929',
+  },
+};
