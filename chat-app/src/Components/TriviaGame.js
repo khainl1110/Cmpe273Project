@@ -15,13 +15,11 @@ const socket = io('http://localhost:3001', {
 
 function TriviaGame({ hasStarted, setHasStarted, name, setName, restartGame, socket }) {
   const navigate = useNavigate();
-  const { theme, setTheme } = useContext(ThemeContext);
-  //const [name, setName] = useState('');
   const [customInput, setCustomInput] = useState('');
-  //const [hasStarted, setHasStarted] = useState(false);
+  const { theme, setTheme } = useContext(ThemeContext);
   const [showThemes, setShowThemes] = useState(false);
   const [showTopics, setShowTopics] = useState(false);
-  const [selectedEmoji, setSelectedEmoji] = useState('❓');
+  const [selectedEmoji, setSelectedEmoji] = useState('🧠');
   const [selectedTopic, setSelectedTopic] = useState('general knowledge');
 
   useEffect(() => {
@@ -63,19 +61,39 @@ function TriviaGame({ hasStarted, setHasStarted, name, setName, restartGame, soc
         transition: 'background-color 0.4s ease',
       }}
     >
-      <div style={{ position: 'absolute', top: 10, right: 10 }}>
-        <IconButton onClick={() => setShowThemes(!showThemes)}>⚙️</IconButton>
+      {/* Settings button */}
+      <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
+        <IconButton
+          onClick={() => setShowThemes(!showThemes)}
+          sx={{
+            fontSize: '2rem',
+            color: themes[theme].text,
+            backgroundColor: 'rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(6px)',
+            borderRadius: '12px',
+          }}
+          title="Theme Settings"
+        >
+          ⚙️
+        </IconButton>
+
         {showThemes && (
           <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
             {Object.keys(themes).map((key) => (
-              <Button key={key} size="small" onClick={() => setTheme(key)}>
+              <Button
+                key={key}
+                size="small"
+                onClick={() => setTheme(key)}
+                title={`Switch to ${key} theme`}
+              >
                 {themes[key].icon}
               </Button>
             ))}
           </Stack>
         )}
-      </div>
+      </Box>
 
+      {/* Main trivia game logic */}
       {!hasStarted ? (
         <>
           <h2>
@@ -112,44 +130,78 @@ function TriviaGame({ hasStarted, setHasStarted, name, setName, restartGame, soc
           />
 
           <Box sx={{ position: 'absolute', top: 10, left: 10, zIndex: 10 }}>
-            <IconButton onClick={() => setShowTopics(!showTopics)} sx={{ fontSize: '1.5rem' }}>
+            <IconButton onClick={() => setShowTopics(!showTopics)} sx={{ fontSize: '2.1rem' , backgroundColor: 'rgba(255, 255, 255, 0.5)', color: themes[theme].text, backdropFilter: 'blur(4px)', borderRadius: '12px'}}>
               {selectedEmoji}
             </IconButton>
 
-            {showTopics && (
-              <Stack direction="column" spacing={1} sx={{ mt: 1 }}>
-                {[
-                  { emoji: '🎸', topic: 'music' },
-                  { emoji: '🪐', topic: 'space' },
-                  { emoji: '🏛', topic: 'history' },
-                  { emoji: '🎨', topic: 'art & art history' },
-                  { emoji: '🧪', topic: 'science' },
-                  { emoji: '🎬', topic: 'film/tv' },
-                  { emoji: '⚽', topic: 'sports' },
-                  { emoji: '👾', topic: 'pop culture' },
-                  { emoji: '🌎', topic: 'geography' },
-                  { emoji: '❓', topic: 'random' },
-                  { emoji: '✨', topic: 'custom' }
-                ].map(({ emoji, topic }, i) => (
-                  <IconButton
-                    key={i}
-                    onClick={() => {
-                      setSelectedTopic(topic);
-                      setSelectedEmoji(emoji);
-                      setShowTopics(false);
-                    }}
-                    title={topic === 'custom' ? 'Custom' : topic}
+              {showTopics && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    mt: 1,
+                    maxHeight: 500,
+                    overflowY: 'auto',
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)', 
+                    backdropFilter: 'blur(6px)',
+                    boxShadow: 'none',
+                    borderRadius: '12px',
+                    px: 1,
+                    py: 1,
+                  }}
+                >
+                  <Stack direction="column" spacing={1}>
+                    {[
+                      { emoji: '🎸', topic: 'music' },
+                      { emoji: '🪐', topic: 'space' },
+                      { emoji: '🏛', topic: 'history' },
+                      { emoji: '🎨', topic: 'art & art history' },
+                      { emoji: '🧪', topic: 'science' },
+                      { emoji: '🎬', topic: 'film & tv' },
+                      { emoji: '📚', topic: 'literature & books' },
+                      { emoji: '⚽', topic: 'sports' },
+                      { emoji: '👾', topic: 'video games' },
+                      { emoji: '🌎', topic: 'geography' },
+                      { emoji: '👑', topic: 'celebrities & pop culture' },
+                      { emoji: '🧮', topic: 'math' },
+                      { emoji: '🐾', topic: 'animals' },
+                      { emoji: '🧝‍♂️', topic: 'mythology & fantasy' },
+                      { emoji: '🍽', topic: 'food & cuisine' },
+                      { emoji: '🧠', topic: 'general knowledge' },
+                      { emoji: '✨', topic: 'custom' }
+                    ].map(({ emoji, topic }, i) => (
+                      <IconButton
+                        key={i}
+                        onClick={() => {
+                          setSelectedTopic(topic);
+                          setSelectedEmoji(emoji);
+                          setShowTopics(false);
+                        }}
+                        title={topic}
+                        sx={{
+                          fontSize: '1.5rem',
+                          color: selectedTopic === topic ? 'yellow' : themes[theme].text,
+                          backgroundColor: selectedTopic === topic ? 'rgba(255,255,255,0.2)' : 'transparent',
+                          borderRadius: '8px',
+                        }}
+                      >
+                        {emoji}
+                      </IconButton>
+                    ))}
+                  </Stack>
+
+                  {/* Bottom Gradient Hint */}
+                  <Box
                     sx={{
-                      fontSize: '1.5rem',
-                      color: selectedTopic === topic ? 'yellow' : themes[theme].text,
-                      backgroundColor: selectedTopic === topic ? '#444' : 'transparent',
-                      borderRadius: '8px',
+                      position: 'absolute',
+                      bottom: 0,
+                      width: '100%',
+                      height: '20px',
+                      background: 'linear-gradient(to top, rgba(255,255,255,0.7), transparent)',
+                      pointerEvents: 'none',
                     }}
-                  >
-                    {emoji}
-                  </IconButton>
-                ))}
-              </Stack>
+                  />
+                </Box>
+
             )}
 
             {selectedTopic === 'custom' && (
