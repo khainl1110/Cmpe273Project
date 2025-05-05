@@ -14,20 +14,21 @@ const socket = io('http://localhost:3001', {
 
 
 function GameScreen({ name, topic, selectedEmoji, resetToStart, restartGame }) {
+  const [timer, setTimer] = useState(10);   // Each questions time(in seconds)
+  const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(3);    
+  const [skips, setSkips] = useState(3);
+
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
 
+  const [timeUp, setTimeUp] = useState(false);
+  const [question, setQuestion] = useState(null);
   const [questionPool, setQuestionPool] = useState([]);
   const [usedIndices, setUsedIndices] = useState([]);
-  const [question, setQuestion] = useState(null);
-  const [timer, setTimer] = useState(10);
-  const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
-  const [skips, setSkips] = useState(3);
-  const [timeUp, setTimeUp] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   useEffect(() => {
     const handle = (msg) => {
@@ -130,7 +131,7 @@ function GameScreen({ name, topic, selectedEmoji, resetToStart, restartGame }) {
 
   return (
     <Box sx={{ p: 4, textAlign: 'center', fontFamily: themes[theme].font, backgroundColor: themes[theme].background, color: themes[theme].text, fontSize: '1.1rem', minHeight: '100vh', transition: 'background-color 0.4s ease' }}>
-      <Box sx={{ position: 'absolute', top: 10, left: 10, fontSize: '1.5rem' }}>{selectedEmoji}</Box>
+      <Box sx={{ position: 'absolute', top: 10, left: 10, fontSize: '2.2rem' }}>{selectedEmoji}</Box>
 
       <h2>Hey {name || 'Player'} 👋</h2>
       <p>❤️ Lives: {lives} | ⭐ Score: {score} | ⏱️ Time: {timer}s | ⏩ Skips: {skips}</p>
@@ -179,7 +180,7 @@ function GameScreen({ name, topic, selectedEmoji, resetToStart, restartGame }) {
             </Button>
             <Button
               onClick={restartGame}
-              sx={{ backgroundColor: '#f06292', color: '#fff', fontWeight: 700, borderRadius: '12px', px: 3, py: 1 }}
+              sx={{ backgroundColor: '#ff6762', color: '#fff', fontWeight: 700, borderRadius: '12px', px: 3, py: 1 }}
             >
               🔁 Restart
             </Button>

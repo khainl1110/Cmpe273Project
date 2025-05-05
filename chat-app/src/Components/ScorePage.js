@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';           // ✅ Unchanged
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ThemeContext } from './ThemeContext';
 import { themes } from '../themes';
@@ -11,7 +11,6 @@ const socket = io('http://localhost:3001', {
   extraHeaders: { 'Access-Control-Allow-Origin': '*' }
 });
 
-
 function ScorePage({ restartGame }) {
   const { theme, setTheme } = useContext(ThemeContext);
   const location = useLocation();
@@ -19,31 +18,42 @@ function ScorePage({ restartGame }) {
   const { name, score } = location.state || { name: 'Player', score: 0 };
 
   const [showThemes, setShowThemes] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState([]);
 
-  const leaderboardData = [
-    { name: 'Olivia', score: 6 },
-    { name: 'Noah', score: 5 },
-    { name: 'Emma', score: 5 },
-    { name: 'Liam', score: 4 },
-    { name: 'Ava', score: 4 },
-    { name: 'Elijah', score: 3 },
-    { name: 'Sophia', score: 3 },
-    { name: 'Mason', score: 2 },
-    { name: 'Isabella', score: 2 },
-    { name: 'Logan', score: 1 },
-    { name: 'Lucas', score: 1 },
-    { name: 'Mila', score: 1 }
-  ];
+  const hasSubmitted = useRef(false);
+
+  useEffect(() => {
+    if (!hasSubmitted.current) {
+      const safeName = name && name.trim() !== '' ? name.trim() : 'Player';
+
+      socket.emit('submit score', { name: safeName, score });
+      hasSubmitted.current = true;
+    }
+  }, [name, score]);
+
+  useEffect(() => {
+    const handleLeaderboard = top10 => {
+      setLeaderboardData(top10);
+    };
+    const handleError = err => {
+      console.error('Leaderboard error:', err);
+    };
+
+    socket.on('leaderboard', handleLeaderboard);
+    socket.on('leaderboard error', handleError);
+
+    return () => {
+      socket.off('leaderboard', handleLeaderboard);
+      socket.off('leaderboard error', handleError);
+    };
+  }, []); 
 
   const handlePlayAgain = () => {
     restartGame();
     navigate('/');
     socket.emit('reset');
-
     socket.disconnect();
-    setTimeout(() => {
-      socket.connect();
-    }, 200);
+    setTimeout(() => socket.connect(), 200);
   };
 
   return (
@@ -59,19 +69,50 @@ function ScorePage({ restartGame }) {
         position: 'relative',
       }}
     >
-      {/* ⚙️ Settings Button */}
-      <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
-        <IconButton onClick={() => setShowThemes(!showThemes)}>⚙️</IconButton>
+
+    {/* ⚙️ Settings button */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          zIndex: 10
+        }}
+      >
+        <IconButton
+          onClick={() => setShowThemes(!showThemes)}
+          sx={{
+            fontSize: '2rem',
+            color: themes[theme].text,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(6px)',
+            borderRadius: '12px'
+          }}
+          title="Theme Settings"
+        >
+          ⚙️
+        </IconButton>
+
         {showThemes && (
-          <Stack direction="row" spacing={1} sx={{
-            mt: 1,
-            background: themes[theme].background,
-            p: 1,
-            borderRadius: '10px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-          }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              mt: 1,
+              p: 1,
+              borderRadius: '10px',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(6px)',
+              boxShadow: 1
+            }}
+          >
             {Object.keys(themes).map((key) => (
-              <Button key={key} size="small" onClick={() => setTheme(key)}>
+              <Button
+                key={key}
+                size="small"
+                onClick={() => setTheme(key)}
+                title={`Switch to ${key} theme`}
+              >
                 {themes[key].icon}
               </Button>
             ))}
@@ -79,57 +120,35 @@ function ScorePage({ restartGame }) {
         )}
       </Box>
 
+
       <Typography variant="h3" sx={{ mb: 2, fontFamily: themes[theme].font }}>
-        🎉 Game Over 🎉 
+        🎉 Game Over 🎉
       </Typography>
 
-      <Typography
-        variant="h5"
+      <Typography variant="h5" sx={{ mb: 3 }}>
+        {name ? `${name}, you scored ` : 'You scored '}<strong>{score}</strong>!
+      </Typography>
+
+      {/* 🏆 Leaderboard */}
+      <Box
         sx={{
-          mb: 3,
-          fontFamily: themes[theme].font,
-          color: themes[theme].text
+          mx: 'auto',
+          maxWidth: 360,
+          maxHeight: 300,
+          overflowY: 'auto',
+          textAlign: 'left',
+          backgroundColor: theme === 'cute' || theme === 'clean' ? '#ffffffcc' : '#1a1a1a',
+          color: theme === 'cute' || theme === 'clean' ? '#333' : themes[theme].text,
+          borderRadius: '12px',
+          p: 3,
+          mb: 4,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
         }}
       >
-        {name ? `${name}, you scored ` : 'You scored '}
-        <strong>{score}</strong>!
-      </Typography>
-
-      {/* Leaderboard */}
-        <Box
-          sx={{
-            mx: 'auto',
-            maxWidth: 360,
-            maxHeight: 300,
-            overflowY: 'auto',
-            textAlign: 'left',
-            backgroundColor:
-              theme === 'cute' || theme === 'clean'
-                ? '#ffffffcc'
-                : '#1a1a1a',
-            color:
-              theme === 'cute' || theme === 'clean'
-                ? '#333'
-                : themes[theme].text,
-            borderRadius: '12px',
-            p: 3,
-            mb: 4,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          }}
-        >
-
-        <Typography
-          variant="h6"
-          sx={{
-            mb: 2,
-            fontFamily: themes[theme].font,
-            color: themes[theme].text
-          }}
-        >
-          🏆 Top 10 Leaderboard
-        </Typography>
-
-        {leaderboardData.map((entry, i) => (
+        <Typography variant="h6" sx={{ mb: 2 }}>🏆 Top 10 Leaderboard</Typography>
+        {leaderboardData.length === 0 ? (
+          <Typography variant="body2">Loading leaderboard...</Typography>
+        ) : leaderboardData.map((entry, i) => (
           <Box
             key={i}
             sx={{
@@ -139,9 +158,9 @@ function ScorePage({ restartGame }) {
               px: 1,
               py: 0.5,
               borderRadius: '6px',
-              transition: 'all 0.2s ease',
               fontFamily: themes[theme].font,
               color: themes[theme].text,
+              transition: '0.2s',
               '&:hover': {
                 fontWeight: 'bold',
                 fontSize: '1.05rem',
@@ -155,7 +174,6 @@ function ScorePage({ restartGame }) {
         ))}
       </Box>
 
-      {/* Play Again */}
       <Stack direction="row" spacing={2} justifyContent="center">
         <Button
           variant="contained"
@@ -192,3 +210,4 @@ function ScorePage({ restartGame }) {
 }
 
 export default ScorePage;
+
