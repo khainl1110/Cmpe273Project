@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';           // ✅ Unchanged
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ThemeContext } from './ThemeContext';
 import { themes } from '../themes';
@@ -20,20 +20,31 @@ function ScorePage({ restartGame }) {
   const [showThemes, setShowThemes] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState([]);
 
-  useEffect(() => {
-    // 📨 Send score to backend
-    fetch('http://localhost:3001/api/submit-score', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, score }),
-    }).catch(err => console.error('Score submission failed:', err));
+  const hasSubmitted = useRef(false);
 
-    // 📥 Fetch leaderboard
-    fetch('http://localhost:3001/api/leaderboard')
-      .then(res => res.json())
-      .then(data => setLeaderboardData(data || []))
-      .catch(err => console.error('Leaderboard fetch failed:', err));
+  useEffect(() => {
+    if (!hasSubmitted.current) {
+      socket.emit('submit score', { name, score });
+      hasSubmitted.current = true;
+    }
   }, [name, score]);
+
+  useEffect(() => {
+    const handleLeaderboard = top10 => {
+      setLeaderboardData(top10);
+    };
+    const handleError = err => {
+      console.error('Leaderboard error:', err);
+    };
+
+    socket.on('leaderboard', handleLeaderboard);
+    socket.on('leaderboard error', handleError);
+
+    return () => {
+      socket.off('leaderboard', handleLeaderboard);
+      socket.off('leaderboard error', handleError);
+    };
+  }, []); 
 
   const handlePlayAgain = () => {
     restartGame();

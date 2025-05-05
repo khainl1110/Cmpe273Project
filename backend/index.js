@@ -4,6 +4,21 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const axios = require('axios');
 require('dotenv').config();
+const mongoose = require('mongoose');
+
+// Connect to MongoDB (dev only - replace with env var in production)
+const MONGO_URI = 'mongodb+srv://parakramdahal:BgCjNVghcuUEbuol@cluster0.ugp4oos.mongodb.net/quizApp?retryWrites=true&w=majority';
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// Leader model
+const { Schema, model } = mongoose;
+const Leader = model('Leader', new Schema({
+  name:     { type: String, required: true },
+  score:    { type: Number, required: true },
+  playedAt: { type: Date,   default: Date.now }
+}));
 
 const app = express();
 app.use(cors({
@@ -168,6 +183,21 @@ io.on('connection', (socket) => {
     console.log(`{ topic: '${topic}', score: ${score} }`);
     socket.emit('chat message', chatMsg);
   });
+  socket.on('submit score', async ({ name, score: finalScore }) => {
+    try {
+      await new Leader({ name, score: finalScore }).save();
+      // get top 10 and send back
+      const top10 = await Leader.find()
+        .sort({ score: -1, playedAt: 1 })
+        .limit(10)
+        .select('name score -_id');
+      io.emit('leaderboard', top10);
+    } catch (err) {
+      console.error('❌ Error saving leaderboard:', err);
+      socket.emit('leaderboard error', { message: 'Could not save score' });
+    }
+  });
+
 
   socket.on('reset', () => {
     score = 0;
@@ -180,6 +210,19 @@ io.on('connection', (socket) => {
     score = 0;
     console.log('🔌 Client disconnected');
   });
+});
+// Leaderboard endpoint
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const top10 = await Leader.find()
+      .sort({ score: -1, playedAt: 1 })
+      .limit(10)
+      .select('name score -_id');
+    res.json(top10);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
