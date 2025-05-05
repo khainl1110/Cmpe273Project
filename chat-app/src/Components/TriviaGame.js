@@ -155,7 +155,7 @@ function TriviaGame({ hasStarted, setHasStarted, name, setName, restartGame, soc
                       { emoji: '🌎', topic: 'geography' },
                       { emoji: '👑', topic: 'celebrities & pop culture' },
                       { emoji: '🧮', topic: 'math' },
-                      { emoji: '🐾', topic: 'animals' },
+                      { emoji: '🐾', topic: 'wildlife & nature' },
                       { emoji: '🧝‍♂️', topic: 'mythology & fantasy' },
                       { emoji: '🍽', topic: 'food & cuisine' },
                       { emoji: '🧠', topic: 'general knowledge' },

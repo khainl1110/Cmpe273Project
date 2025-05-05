@@ -24,7 +24,9 @@ function ScorePage({ restartGame }) {
 
   useEffect(() => {
     if (!hasSubmitted.current) {
-      socket.emit('submit score', { name, score });
+      const safeName = name && name.trim() !== '' ? name.trim() : 'Player';
+
+      socket.emit('submit score', { name: safeName, score });
       hasSubmitted.current = true;
     }
   }, [name, score]);

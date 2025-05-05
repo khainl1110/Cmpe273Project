@@ -201,7 +201,7 @@ io.on('connection', (socket) => {
 
   socket.on('reset', () => {
     score = 0;
-    recentnswers = [];
+    recentAnswers = [];
     lastTenQuestions = [];
     console.log('🔁 Game reset');
   });
