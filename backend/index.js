@@ -38,33 +38,34 @@ async function generateAIQuestion(topic, avoidList = []) {
     'Authorization': `Bearer ${OPENAI_API_KEY}`,
   };
 
-  const blockedWords = avoidList.join(', ') || 'none'; // NOTE: using the entire list might be too strict for gpt & it might ignore it
-  //const blockedWords = avoidList.slice(-5).join(', ') || 'none'; // block most recent 5 questions
+  // const blockedWords = avoidList.join(', ') || 'none'; // NOTE: using the entire list might be too strict for gpt & it might ignore it
+  const blockedWords = avoidList.slice(-10).join(', ') || 'none'; // block most recent 10 questions
   const body = {
     model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        //content: "Generate a unique trivia question with 5 answer options in this JSON format: {question: string, options: string[], correctIndex: number}",
-        content: `
-            You are a trivia question generator for a web game. Follow these instructions exactly:
-            1. Create one trivia question strictly based on the topic: "{topic}".
-            2. Do not include any content, phrasing, or themes related to: "{blockedWords}" — this includes synonyms or reworded forms.
-            3. Output only a valid JSON object in this format:
-               { "question": string, "options": string[5], "correctIndex": number }
-            4. Do not include any explanations, markdown, or extra text — return only the JSON.
-            The question must:
-            - Be clear and easy to understand
-            - Include exactly 5 realistic answer choices, one correct (placed randomly)
-            - Be easy to medium in difficulty — no obscure trivia
-            - Avoid reusing or paraphrasing recent content
-            `.trim()  // stricter prompt to avoid repeats/bad questions
-      },
-      {
-        role: "user",
-        content: `1. Create a trivia question specifically about: "${topic}" 2. Do not use or reference any of the following topics: "${blockedWords}"`,
-      }
-    ],
+    messages:  [
+        {
+          role: "system",
+          content: `
+              You are a trivia question generator for a web game. Follow these instructions exactly:
+
+              1. Create one trivia question strictly about: "${topic}".
+              2. Do not include any content, phrases, or themes related to blocked content: "${blockedWords}". This includes alternate spellings or reworded forms.
+              3. Output only a valid JSON object in this format:
+                 { "question": string, "options": string[5], "correctIndex": number }
+              4. Do not include explanations, formatting, markdown, or extra text of any kind.
+
+              The question must:
+              - Be clear and easy to understand
+              - Include 5 realistic answer choices, one correct (randomly placed)
+              - Be easy to medium in difficulty
+              - Not reuse or paraphrase any blocked content
+          `.trim(),
+        },
+        {
+          role: "user",
+          content: `Generate a trivia question about: "${topic}"`,
+        },
+      ],
     response_format: { type: "json_object" },
   };
 
@@ -107,7 +108,12 @@ io.on('connection', (socket) => {
   console.log('🟢 New client connected');
 
   socket.on('chat message', async (msg) => {
-    let topic = currentTopic || 'general knowledge';
+    let topic = currentTopic || 'fun and surprising trivia from a wide range of interesting topics';
+
+    // Improve GPT variety for general knowledge
+    if (topic.toLowerCase().includes('general knowledge')) {
+      topic = 'fun and surprising trivia from a wide range of interesting topics';
+    }
 
     if (typeof msg === 'object') {
       if (typeof msg.topic === 'string' && msg.topic.trim().length >= 3) {
@@ -141,8 +147,8 @@ io.on('connection', (socket) => {
           break;
         }
 
-        //console.log(`🔁 Question: "${normalizedQuestion}"`);
-        //console.log(`🔁 Answer: "${normalizedAnswer}"`);
+        console.log(`🔁 Question: "${normalizedQuestion}"`);
+        console.log(`🔁 Answer: "${normalizedAnswer}"`);
         console.log('🧠 Blocked Answers:', recentAnswers);
         console.log('🧠 Blocked Questions:', lastTenQuestions);
         console.log('❌ Skipping repeated question/answer');

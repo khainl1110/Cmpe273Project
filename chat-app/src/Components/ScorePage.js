@@ -56,56 +56,56 @@ function ScorePage({ restartGame }) {
         position: 'relative',
       }}
     >
-      {/* ⚙️ Theme Toggle */}
-{/* ⚙️ Settings button */}
-<Box
-  sx={{
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 10
-  }}
->
-  <IconButton
-    onClick={() => setShowThemes(!showThemes)}
-    sx={{
-      fontSize: '2rem',
-      color: themes[theme].text,
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      backdropFilter: 'blur(6px)',
-      borderRadius: '12px'
-    }}
-    title="Theme Settings"
-  >
-    ⚙️
-  </IconButton>
 
-  {showThemes && (
-    <Stack
-      direction="row"
-      spacing={1}
-      sx={{
-        mt: 1,
-        p: 1,
-        borderRadius: '10px',
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(6px)',
-        boxShadow: 1
-      }}
-    >
-      {Object.keys(themes).map((key) => (
-        <Button
-          key={key}
-          size="small"
-          onClick={() => setTheme(key)}
-          title={`Switch to ${key} theme`}
+    {/* ⚙️ Settings button */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          zIndex: 10
+        }}
+      >
+        <IconButton
+          onClick={() => setShowThemes(!showThemes)}
+          sx={{
+            fontSize: '2rem',
+            color: themes[theme].text,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(6px)',
+            borderRadius: '12px'
+          }}
+          title="Theme Settings"
         >
-          {themes[key].icon}
-        </Button>
-      ))}
-    </Stack>
-  )}
-</Box>
+          ⚙️
+        </IconButton>
+
+        {showThemes && (
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              mt: 1,
+              p: 1,
+              borderRadius: '10px',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(6px)',
+              boxShadow: 1
+            }}
+          >
+            {Object.keys(themes).map((key) => (
+              <Button
+                key={key}
+                size="small"
+                onClick={() => setTheme(key)}
+                title={`Switch to ${key} theme`}
+              >
+                {themes[key].icon}
+              </Button>
+            ))}
+          </Stack>
+        )}
+      </Box>
 
 
       <Typography variant="h3" sx={{ mb: 2, fontFamily: themes[theme].font }}>
