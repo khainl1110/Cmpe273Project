@@ -180,7 +180,7 @@ function GameScreen({ name, topic, selectedEmoji, resetToStart, restartGame }) {
             </Button>
             <Button
               onClick={restartGame}
-              sx={{ backgroundColor: '#f06292', color: '#fff', fontWeight: 700, borderRadius: '12px', px: 3, py: 1 }}
+              sx={{ backgroundColor: '#ff6762', color: '#fff', fontWeight: 700, borderRadius: '12px', px: 3, py: 1 }}
             >
               🔁 Restart
             </Button>

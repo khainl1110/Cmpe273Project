@@ -1,20 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Box, Button, TextField, Stack, IconButton } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from './ThemeContext';
 import { themes } from '../themes';
 import GameScreen from './GameScreen';
 import MusicPlayer from './MusicPlayer';
-import io from 'socket.io-client';
 
-const socket = io('http://localhost:3001', {
-  transports: ['websocket'],
-  withCredentials: true,
-  extraHeaders: { 'Access-Control-Allow-Origin': '*' }
-});
 
 function TriviaGame({ hasStarted, setHasStarted, name, setName, restartGame, socket }) {
-  const navigate = useNavigate();
   const [customInput, setCustomInput] = useState('');
   const { theme, setTheme } = useContext(ThemeContext);
   const [showThemes, setShowThemes] = useState(false);
@@ -188,18 +180,6 @@ function TriviaGame({ hasStarted, setHasStarted, name, setName, restartGame, soc
                       </IconButton>
                     ))}
                   </Stack>
-
-                  {/* Bottom Gradient Hint */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      width: '100%',
-                      height: '20px',
-                      background: 'linear-gradient(to top, rgba(255,255,255,0.7), transparent)',
-                      pointerEvents: 'none',
-                    }}
-                  />
                 </Box>
 
             )}

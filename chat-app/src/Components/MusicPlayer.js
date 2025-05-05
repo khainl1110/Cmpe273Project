@@ -5,13 +5,14 @@ function MusicPlayer() {
   const audioRef = useRef(null);
   const [playlist, setPlaylist] = useState([]);
   const [trackIndex, setTrackIndex] = useState(0);
-  const [volume, setVolume] = useState(0.3);
+  const [volume, setVolume] = useState(0.1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
   // Load playlist on mount
   useEffect(() => {
-    fetch('/api/music-list')
+    console.log("🎵 MusicPlayer component rendered");
+    fetch('http://localhost:3001/api/music-list')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -42,7 +43,7 @@ function MusicPlayer() {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
-  }, [volume]);
+  }, [trackIndex, playlist, isPlaying, volume]);
 
   const toggleMusic = () => {
     const audio = audioRef.current;
