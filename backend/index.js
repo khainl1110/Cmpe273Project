@@ -151,8 +151,13 @@ io.on('connection', (socket) => {
         const normalizedAnswer = answerText?.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
         const normalizedQuestion = chatMsg.question?.toLowerCase().replace(/[^\w\s]/g, '').trim();
 
-        const isAnswerRepeat = !normalizedAnswer || recentAnswers.includes(normalizedAnswer);
-        const isQuestionRepeat = !normalizedQuestion || lastTenQuestions.includes(normalizedQuestion);
+        const isAnswerRepeat = !normalizedAnswer || recentAnswers.some(ans =>
+          normalizedAnswer.includes(ans) || ans.includes(normalizedAnswer)
+        );
+        
+        const isQuestionRepeat = !normalizedQuestion || lastTenQuestions.some(q =>
+          normalizedQuestion.includes(q) || q.includes(normalizedQuestion)
+        );
 
         if (!isAnswerRepeat && !isQuestionRepeat) {
           recentAnswers.push(normalizedAnswer);
